@@ -5,11 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            //"name": "Python: Current File",
+            "name": "src0: Solve maze",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "args": ["src0/maze1.txt"],
+            //"program": "${file}",
+            "program": "src0/maze.py",
+            //"args": ["src0/maze1.txt"],
+            "args": ["${file}"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true
