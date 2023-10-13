@@ -40,11 +40,11 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    if board[action.left][action.right] != EMPTY:
+    if board[action[0]][action[1]] != EMPTY:
         raise InvalidPosition
     
     new_board = copy.deepcopy(board)
-    new_board[action.left][action.right] = player(new_board)
+    new_board[action[0]][action[1]] = player(new_board)
     return new_board
 
 def winner(board):
