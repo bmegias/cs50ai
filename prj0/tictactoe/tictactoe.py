@@ -3,11 +3,15 @@ Tic Tac Toe Player
 """
 
 import math
+import copy
 
 X = "X"
 O = "O"
 EMPTY = None
 
+class InvalidPosition(Exception):
+    "Position is not empty"
+    pass
 
 def initial_state():
     """
@@ -32,13 +36,16 @@ def actions(board):
     """
     raise NotImplementedError
 
-
 def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    raise NotImplementedError
-
+    if board[action.left][action.right] != EMPTY:
+        raise InvalidPosition
+    
+    new_board = copy.deepcopy(board)
+    new_board[action.left][action.right] = player(new_board)
+    return new_board
 
 def winner(board):
     """
