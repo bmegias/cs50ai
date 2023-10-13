@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Degrees small",
+            "type": "python",
+            "request": "launch",
+            "program": "degrees.py",
+            "args": [
+                "small"
+            ],
+            "cwd": "${workspaceFolder}/prj0/degrees/",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             //"name": "Python: Current File",
             "name": "src0: Solve maze",
             "type": "python",
@@ -12,7 +24,9 @@
             //"program": "${file}",
             "program": "src0/maze.py",
             //"args": ["src0/maze1.txt"],
-            "args": ["${file}"],
+            "args": [
+                "${file}"
+            ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true
