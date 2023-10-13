@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "Degrees small",
             "type": "python",
             "request": "launch",
@@ -17,13 +26,10 @@
             "justMyCode": true
         },
         {
-            //"name": "Python: Current File",
             "name": "src0: Solve maze",
             "type": "python",
             "request": "launch",
-            //"program": "${file}",
             "program": "src0/maze.py",
-            //"args": ["src0/maze1.txt"],
             "args": [
                 "${file}"
             ],
