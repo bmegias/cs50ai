@@ -87,20 +87,24 @@ def utility(board):
         return -1
     return 0
 
-def max_value(board):
+def max_value(board,cur_min):
     if terminal(board):
         return utility(board)
     v=-2
     for action in actions(board):
-        v = max(v,min_value(result(board,action)))
+        v = max(v,min_value(result(board,action),v))
+        if cur_min!=None and v>= cur_min:
+            return v
     return v
 
-def min_value(board):
+def min_value(board,cur_max):
     if terminal(board):
         return utility(board)
     v=2
     for action in actions(board):
-        v = min(v,max_value(result(board,action)))
+        v = min(v,max_value(result(board,action),v))
+        if cur_max!=None and v<=cur_max: 
+            return v
     return v
 
 def minimax(board):
@@ -111,13 +115,13 @@ def minimax(board):
         return None
     acs = actions(board)
     if player(board) == X: # MAX
-        min_values_for_actions=list(map(lambda a:(min_value(result(board,a)),a),acs))
+        min_values_for_actions=list(map(lambda a:(min_value(result(board,a),None),a),acs))
         highest=max([t[0] for t in min_values_for_actions])
         for t in min_values_for_actions:
             if t[0] == highest:
                 return t[1]
     if player(board) == O: # MIN
-        max_values_for_actions=list(map(lambda a:(max_value(result(board,a)),a),acs))
+        max_values_for_actions=list(map(lambda a:(max_value(result(board,a),None),a),acs))
         smallest=min([t[0] for t in max_values_for_actions])
         for t in max_values_for_actions:
             if t[0] == smallest:
