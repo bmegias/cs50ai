@@ -26,7 +26,7 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    if board[0].count(EMPTY)+board[1].count(EMPTY)+board[2].count(EMPTY) % 2 == 1 :
+    if (board[0].count(EMPTY)+board[1].count(EMPTY)+board[2].count(EMPTY)) % 2 == 1 :
         return X
     return O
 
@@ -34,7 +34,12 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    actions = []
+    for i in range(3):
+        for j in range(3):
+            if board[i][j]==EMPTY:
+                actions.append((i,j))
+    return actions
 
 def result(board, action):
     """
@@ -58,9 +63,9 @@ def winner(board):
     return None
 
 def is_three_board(board, player):
-    diag1 = [board[0][0],board[1][1],board[2][2]]
-    diag2 = [board[0][2],board[1][1],board[2][0]]
-    return any(is_three_row(row,player) for row in board) or is_three_row(diag1,player) or is_three_row(diag2,player) 
+    diag = [[board[0][0],board[1][1],board[2][2]],[board[0][2],board[1][1],board[2][0]]]
+    vert = [[board[0][0],board[1][0],board[2][0]],[board[0][1],board[1][1],board[2][1]],[board[0][2],board[1][2],board[2][2]]]
+    return any(is_three_row(row,player) for row in [*board,*diag,*vert]) 
 
 def is_three_row(row, player):
     return row.count(player) == 3
@@ -82,8 +87,40 @@ def utility(board):
         return -1
     return 0
 
+def max_value(board):
+    if terminal(board):
+        return utility(board)
+    v=-2
+    for action in actions(board):
+        v = max(v,min_value(result(board,action)))
+    return v
+
+def min_value(board):
+    if terminal(board):
+        return utility(board)
+    v=2
+    for action in actions(board):
+        v = min(v,max_value(result(board,action)))
+    return v
+
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+    if terminal(board):
+        return None
+    acs = actions(board)
+    if player(board) == X: # MAX
+        min_values_for_actions=list(map(lambda a:(min_value(result(board,a)),a),acs))
+        highest=max([t[0] for t in min_values_for_actions])
+        for t in min_values_for_actions:
+            if t[0] == highest:
+                return t[1]
+    if player(board) == O: # MIN
+        max_values_for_actions=list(map(lambda a:(max_value(result(board,a)),a),acs))
+        smallest=min([t[0] for t in max_values_for_actions])
+        for t in max_values_for_actions:
+            if t[0] == smallest:
+                return t[1]
+    return None
+
