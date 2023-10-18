@@ -218,5 +218,9 @@ while True:
             nearby = game.nearby_mines(move)
             revealed.add(move)
             ai.add_knowledge(move, nearby)
+            found_set = ai.mines
+            if len(found_set) > len(flags) :
+                for flagged in found_set:
+                    flags.add(flagged)
 
     pygame.display.flip()

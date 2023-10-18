@@ -106,7 +106,7 @@ class Sentence():
         Returns the set of all cells in self.cells known to be mines.
         """
         # More generally, any time the number of cells is equal to the count, we know that all of that sentence’s cells must be mines.
-        if len(self.cells) == self.count:
+        if self.count > 0 and len(self.cells) == self.count:
             return self.cells
         return []
         #raise NotImplementedError
@@ -128,6 +128,7 @@ class Sentence():
         """
         if cell in self.cells:
             self.cells.remove(cell)
+            self.count -= 1
         #raise NotImplementedError
 
     def mark_safe(self, cell):
@@ -199,13 +200,13 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        # The function should mark the cell as one of the moves made in the game.
+        # 1.The function should mark the cell as one of the moves made in the game.
         self.moves_made.add(cell)
         
-        # The function should mark the cell as a safe cell, updating any sentences that contain the cell as well.
+        # 2.The function should mark the cell as a safe cell, updating any sentences that contain the cell as well.
         self.mark_safe(cell)
         
-        # The function should add a new sentence to the AI’s knowledge base, 
+        # 3.The function should add a new sentence to the AI’s knowledge base, 
         # based on the value of cell and count, to indicate that count of the cell’s neighbors are mines. 
         # Be sure to only include cells whose state is still undetermined in the sentence.
         cells=[]
@@ -213,37 +214,41 @@ class MinesweeperAI():
             for j in range(max(cell[1] - 1,0), min(cell[1] + 2,self.width)):
                 if not((i,j) in self.safes or (i,j) in self.mines):
                     cells.append((i,j))
-        self.knowledge.append(Sentence(cells,count))
+                if (i,j) in self.mines:
+                    count -= 1
+        if len(cells) > 0:
+            self.knowledge.append(Sentence(cells,count))
         
-        # If, based on any of the sentences in self.knowledge, new cells can be marked as safe or as mines, then the function should do so.
-        new_safe = []
-        new_mine = []
-        for s in self.knowledge:
-            for c in s.known_safes():
-                new_safe.append(c)
-            for c in s.known_mines():
-                new_mine.append(c)
-        for c in new_safe:
-            self.mark_safe(c)
-        for c in new_mine:
-            self.mark_mine(c)
+        new_knowledge = True
+        while new_knowledge:
+            # 4.If, based on any of the sentences in self.knowledge, new cells can be marked as safe or as mines, then the function should do so.
+            for s in self.knowledge:
+                tmp = list(s.known_safes())
+                for c in tmp:
+                    self.mark_safe(c)
+                tmp = list(s.known_mines())
+                for c in tmp:
+                    self.mark_mine(c)
 
-        # If, based on any of the sentences in self.knowledge, new sentences can be inferred (using the subset method described in the Background), 
-        # then those sentences should be added to the knowledge base as well.
-        new_sentences = []
-        
-        for s1 in self.knowledge:
-            for s2 in self.knowledge:
-                if(s1==s2):
-                    continue
-                if len(s1.cells) > 0 and s1.cells.issubset(s2.cells):
-                    news = Sentence(s2.cells - s1.cells , s2.count - s1.count)
-                    print("** New sentence!")
-                    print(news)
-                    new_sentences.append(news)
-        self.knowledge.extend(new_sentences)
-
-        self.knowledge = [s for s in self.knowledge if s.count != 0]
+            # 5.If, based on any of the sentences in self.knowledge, new sentences can be inferred (using the subset method described in the Background), 
+            # then those sentences should be added to the knowledge base as well.
+            new_sentences = []
+            
+            for s1 in self.knowledge:
+                for s2 in self.knowledge:
+                    if(s1==s2):
+                        continue
+                    if (s2.count - s1.count >= 0) and s1.cells.issubset(s2.cells):
+                        news = Sentence(s2.cells - s1.cells , s2.count - s1.count)
+                        if(news not in self.knowledge):
+                            print("** New sentence!")
+                            print(s1)
+                            print(s2)
+                            print(news)
+                            new_sentences.append(news)
+            self.knowledge.extend(new_sentences)
+            self.knowledge = [s for s in self.knowledge if len(s.cells) != 0]
+            new_knowledge = len(new_sentences) > 0
         
         print('*************')
         print('k -----------')
