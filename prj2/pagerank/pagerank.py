@@ -6,7 +6,6 @@ import sys
 DAMPING = 0.85
 SAMPLES = 10000
 
-"""
 def main():
     if len(sys.argv) != 2:
         sys.exit("Usage: python pagerank.py corpus")
@@ -19,12 +18,6 @@ def main():
     print(f"PageRank Results from Iteration")
     for page in sorted(ranks):
         print(f"  {page}: {ranks[page]:.4f}")
-"""
-
-def main():
-    corpus = {"1.html": {"2.html", "3.html"}, "2.html": {"3.html"}, "3.html": {"2.html"}}
-    #corpus = crawl("corpus2")
-    print(transition_model(corpus,"1.html",DAMPING))
 
 def crawl(directory):
     """
@@ -84,7 +77,18 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    N = len(corpus.keys())
+    count = {p:0 for p in corpus.keys()}
+    model = {p:1/N for p in corpus.keys()}
+    
+    for i in range(n):
+        cur_page = random.choices(list(model.keys()), weights=model.values())[0]
+        count[cur_page] += 1/n
+        model = transition_model(corpus,cur_page,damping_factor)
+    
+    #print(model)
+    return count
+    #raise NotImplementedError
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -116,7 +120,7 @@ def iterate_pagerank(corpus, damping_factor):
         if not any([r for r in new_pr if abs(new_pr[r]-pr[r]) > 0.001]):
             break
         pr = new_pr
-        print(pr)
+        #print(pr)
            
     return pr
     #raise NotImplementedError
