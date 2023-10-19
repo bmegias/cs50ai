@@ -101,7 +101,6 @@ def iterate_pagerank(corpus, damping_factor):
         else:
             fixed_corpus[p]=corpus[p]
     
-    keep_iterating = True
     while True:
         new_pr = {}
         for p in pr.keys():
