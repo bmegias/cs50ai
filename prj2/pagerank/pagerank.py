@@ -23,7 +23,7 @@ def main():
 
 def main():
     #corpus = {"1.html": {"2.html", "3.html"}, "2.html": {"3.html"}, "3.html": {"2.html"}}
-    corpus = crawl("corpus0")
+    corpus = crawl("corpus2")
     ranks = iterate_pagerank(corpus, DAMPING)
     print(f"PageRank Results from Iteration")
     for page in sorted(ranks):
@@ -94,16 +94,24 @@ def iterate_pagerank(corpus, damping_factor):
     for page in corpus.keys():
         pr[page] = 1/N
     
+    fixed_corpus = {}
+    for p in corpus:
+        if not any(corpus[p]):
+            fixed_corpus[p]=set(corpus.keys())
+        else:
+            fixed_corpus[p]=corpus[p]
+    
     keep_iterating = True
-    while keep_iterating:
+    while True:
         new_pr = {}
         for p in pr.keys():
-            pages_linking_to_p = [i for i in pr.keys() if p in corpus[i]]
-            new_pr[p]= (1 - damping_factor) / N + damping_factor * sum([pr[i]/len(corpus[i]) for i in pages_linking_to_p])
-        keep_iterating = any([r for r in new_pr if abs(new_pr[r]-pr[r]) > 0.001])
-        print (new_pr)
+            pages_linking_to_p = [i for i in pr.keys() if p in fixed_corpus[i]]
+            new_pr[p]= (1 - damping_factor) / N + damping_factor * sum([pr[i]/len(fixed_corpus[i]) for i in pages_linking_to_p])
+        if not any([r for r in new_pr if abs(new_pr[r]-pr[r]) > 0.001]):
+            break
         pr = new_pr
-            
+        print(pr)
+           
     return pr
     #raise NotImplementedError
 
