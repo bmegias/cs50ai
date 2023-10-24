@@ -37,7 +37,6 @@ PROBS = {
     "mutation": 0.01
 }
 
-"""
 def main():
     # Check for proper usage
     if len(sys.argv) != 2:
@@ -92,13 +91,6 @@ def main():
             for value in probabilities[person][field]:
                 p = probabilities[person][field][value]
                 print(f"    {value}: {p:.4f}")
-"""
-
-def main():
-    people = load_data("data/family0.csv")
-    p = joint_probability(people, {"Harry"}, {"James"}, {"James"})
-    print (p)
-
 
 def load_data(filename):
     """
@@ -146,32 +138,42 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone not in set` have_trait` does not have the trait.
     """
     partial_results = []
-    for name,info in people.items():
+    for name, info in people.items():
         gene_index = 1 if name in one_gene else 2 if name in two_genes else 0
         trait_index = name in have_trait
         if info['mother'] == None:
             prob = PROBS['gene'][gene_index] * PROBS['trait'][gene_index][trait_index]
-            print (f"{name}: {PROBS['gene'][gene_index]} * {PROBS['trait'][gene_index][trait_index]} = {prob}")
+            #print (f"{name}: {PROBS['gene'][gene_index]} * {PROBS['trait'][gene_index][trait_index]} = {prob}")
             partial_results.append(prob)
         else:
             mother = info['mother']
-            m_info = people[mother]
             m_gene_index = 1 if mother in one_gene else 2 if mother in two_genes else 0
             father = info['father']
-            f_info = people[father]
             f_gene_index = 1 if father in one_gene else 2 if father in two_genes else 0
             
-            if gene_index == 1:
-                prob_m = PROBS['mutation'] if m_gene_index == 0 else 1-PROBS['mutation'] if m_gene_index == 2 else 0.5
-                prob_f = PROBS['mutation'] if f_gene_index == 0 else 1-PROBS['mutation'] if f_gene_index == 2 else 0.5
-                
-                prob_1 = (prob_m * (1-prob_f)) + (prob_f * (1-prob_m))
-                print (f"prob_1 =  ({prob_m} * {1-prob_f}) + ({prob_f} * {1-prob_m}) = {prob_1}")
-                prob = prob_1 * PROBS['trait'][gene_index][trait_index]
-                print (f"{name}: {prob_1} * {PROBS['trait'][gene_index][trait_index]} = {prob}")
-                partial_results.append(prob)
+            mu = PROBS['mutation']
+            in_rules = {0: mu, 1: 0.5, 2: 1-mu}
             
-    return numpy.prod(partial_results)
+            prob_m = in_rules[m_gene_index]
+            prob_f = in_rules[f_gene_index]
+            prob_temp = 0
+            if gene_index == 1:
+                prob_temp = (prob_m * (1-prob_f)) + (prob_f * (1-prob_m))
+                #print (f"prob_temp =  ({prob_m} * {1-prob_f}) + ({prob_f} * {1-prob_m}) = {prob_temp}")
+            elif gene_index == 2:
+                prob_temp = prob_m * prob_f
+                #print (f"prob_temp =  {prob_m} * {prob_f} = {prob_temp}")
+            else:
+                prob_temp = (1-prob_m) * (1-prob_f)
+                #print (f"prob_temp =  {1-prob_m} * {1-prob_f} = {prob_temp}")              
+                
+            prob = prob_temp * PROBS['trait'][gene_index][trait_index]
+            #print (f"{name}: {prob_temp} * {PROBS['trait'][gene_index][trait_index]} = {prob}")
+            partial_results.append(prob)
+            
+    result = numpy.prod(partial_results)
+    #print (result)
+    return result
     #raise NotImplementedError
 
 
@@ -182,7 +184,13 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    for name in probabilities:
+        gene_index = 1 if name in one_gene else 2 if name in two_genes else 0
+        trait_index = name in have_trait
+        probabilities[name]['gene'][gene_index] += p
+        probabilities[name]['trait'][trait_index] += p
+    return
+    #raise NotImplementedError
 
 
 def normalize(probabilities):
@@ -190,7 +198,15 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    for name in probabilities:
+        sum_gene = sum([v[1] for v in probabilities[name]['gene'].items()])
+        for item in probabilities[name]['gene']:
+            probabilities[name]['gene'][item] = probabilities[name]['gene'][item] / sum_gene
+        sum_trait = sum([v[1] for v in probabilities[name]['trait'].items()])
+        for item in probabilities[name]['trait']:
+            probabilities[name]['trait'][item] = probabilities[name]['trait'][item] / sum_trait
+    return
+    #raise NotImplementedError
 
 
 if __name__ == "__main__":
