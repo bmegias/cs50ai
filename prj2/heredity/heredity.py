@@ -1,6 +1,7 @@
 import csv
 import itertools
 import sys
+import numpy
 
 PROBS = {
 
@@ -36,14 +37,13 @@ PROBS = {
     "mutation": 0.01
 }
 
-
+"""
 def main():
-
     # Check for proper usage
     if len(sys.argv) != 2:
         sys.exit("Usage: python heredity.py data.csv")
     people = load_data(sys.argv[1])
-
+    
     # Keep track of gene and trait probabilities for each person
     probabilities = {
         person: {
@@ -92,6 +92,12 @@ def main():
             for value in probabilities[person][field]:
                 p = probabilities[person][field][value]
                 print(f"    {value}: {p:.4f}")
+"""
+
+def main():
+    people = load_data("data/family0.csv")
+    p = joint_probability(people, {"Harry"}, {"James"}, {"James"})
+    print (p)
 
 
 def load_data(filename):
@@ -139,7 +145,34 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    partial_results = []
+    for name,info in people.items():
+        gene_index = 1 if name in one_gene else 2 if name in two_genes else 0
+        trait_index = name in have_trait
+        if info['mother'] == None:
+            prob = PROBS['gene'][gene_index] * PROBS['trait'][gene_index][trait_index]
+            print (f"{name}: {PROBS['gene'][gene_index]} * {PROBS['trait'][gene_index][trait_index]} = {prob}")
+            partial_results.append(prob)
+        else:
+            mother = info['mother']
+            m_info = people[mother]
+            m_gene_index = 1 if mother in one_gene else 2 if mother in two_genes else 0
+            father = info['father']
+            f_info = people[father]
+            f_gene_index = 1 if father in one_gene else 2 if father in two_genes else 0
+            
+            if gene_index == 1:
+                prob_m = PROBS['mutation'] if m_gene_index == 0 else 1-PROBS['mutation'] if m_gene_index == 2 else 0.5
+                prob_f = PROBS['mutation'] if f_gene_index == 0 else 1-PROBS['mutation'] if f_gene_index == 2 else 0.5
+                
+                prob_1 = (prob_m * (1-prob_f)) + (prob_f * (1-prob_m))
+                print (f"prob_1 =  ({prob_m} * {1-prob_f}) + ({prob_f} * {1-prob_m}) = {prob_1}")
+                prob = prob_1 * PROBS['trait'][gene_index][trait_index]
+                print (f"{name}: {prob_1} * {PROBS['trait'][gene_index][trait_index]} = {prob}")
+                partial_results.append(prob)
+            
+    return numpy.prod(partial_results)
+    #raise NotImplementedError
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
