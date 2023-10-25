@@ -163,7 +163,7 @@ class CrosswordCreator():
                     return False
                 used_words.add(w)
                 for n in self.crossword.neighbors(var):
-                    if not assignment[n]: continue # cannot check constraint
+                    if not n in assignment or not assignment[n]: continue # cannot check constraint
                     arc = self.crossword.overlaps[(var,n)]
                     if w[arc[0]] != assignment[n][arc[1]]:
                         return False
@@ -188,7 +188,7 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        return [k for k in assignment if not assignment[k]][0]
+        return [v for v in self.crossword.variables if v not in assignment][0]
         #raise NotImplementedError
 
     def backtrack(self, assignment):
@@ -202,13 +202,10 @@ class CrosswordCreator():
         """
         if self.assignment_complete(assignment): 
             return assignment
-        if len(assignment) == 0:
-            assignment = dict.fromkeys(self.crossword.variables)
         var = self.select_unassigned_variable(assignment)
         for value in self.order_domain_values(var,assignment):
             if self.consistent(assignment|{var:value}):
-                assignment[var] = value
-                result = self.backtrack(assignment)
+                result = self.backtrack(assignment|{var:value})
                 if result: 
                     return result
         return None
@@ -226,8 +223,8 @@ def main():
     words = sys.argv[2]
     output = sys.argv[3] if len(sys.argv) == 4 else None
     """
-    structure = "data/structure0.txt"
-    words = "data/words0.txt"
+    structure = "data/structure2.txt"
+    words = "data/words2.txt"
     output = None
 
     # Generate crossword
