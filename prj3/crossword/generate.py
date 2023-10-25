@@ -188,7 +188,7 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        return [v for v in self.crossword.variables if v not in assignment][0]
+        return sorted(({v:len(self.domains[v]) for v in self.crossword.variables if v not in assignment}).items(), key=lambda x:x[1])[0][0]
         #raise NotImplementedError
 
     def backtrack(self, assignment):
@@ -223,8 +223,8 @@ def main():
     words = sys.argv[2]
     output = sys.argv[3] if len(sys.argv) == 4 else None
     """
-    structure = "data/structure2.txt"
-    words = "data/words2.txt"
+    structure = "data/structure0.txt"
+    words = "data/words0.txt"
     output = None
 
     # Generate crossword
