@@ -147,14 +147,28 @@ class CrosswordCreator():
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-        raise NotImplementedError
+        return len(assignment) == len(self.crossword.variables) and all([k for (v,k) in assignment.items()])
+        #raise NotImplementedError
 
     def consistent(self, assignment):
         """
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
-        raise NotImplementedError
+        used_words = set()
+        for var in assignment:
+            w = assignment[var]
+            if w:
+                if w in used_words or var.length != len(w):
+                    return False
+                used_words.add(w)
+                for n in self.crossword.neighbors(var):
+                    if not assignment[n]: continue # cannot check constraint
+                    arc = self.crossword.overlaps[(var,n)]
+                    if w[arc[0]] != assignment[n][arc[1]]:
+                        return False
+        return True       
+        #raise NotImplementedError
 
     def order_domain_values(self, var, assignment):
         """
@@ -163,7 +177,8 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        raise NotImplementedError
+        return sorted(self.domains[var])
+        #raise NotImplementedError
 
     def select_unassigned_variable(self, assignment):
         """
@@ -173,7 +188,8 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        raise NotImplementedError
+        return [k for k in assignment if not assignment[k]][0]
+        #raise NotImplementedError
 
     def backtrack(self, assignment):
         """
@@ -184,7 +200,19 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        raise NotImplementedError
+        if self.assignment_complete(assignment): 
+            return assignment
+        if len(assignment) == 0:
+            assignment = dict.fromkeys(self.crossword.variables)
+        var = self.select_unassigned_variable(assignment)
+        for value in self.order_domain_values(var,assignment):
+            if self.consistent(assignment|{var:value}):
+                assignment[var] = value
+                result = self.backtrack(assignment)
+                if result: 
+                    return result
+        return None
+        #raise NotImplementedError
 
 
 def main():
