@@ -177,7 +177,17 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        return sorted(self.domains[var])
+        neighbors = self.crossword.neighbors(var)
+        ruled_out = dict()
+        for wx in self.domains[var]:
+            count = 0
+            for n in neighbors:
+                arc = self.crossword.overlaps[(var,n)]
+                for wy in self.domains[n]:
+                    if wx[arc[0]] != wy[arc[1]]:
+                        count += 1
+            ruled_out[wx] = count
+        return sorted(ruled_out.keys(), key=lambda x:x[1])
         #raise NotImplementedError
 
     def select_unassigned_variable(self, assignment):
@@ -188,7 +198,21 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        return sorted(({v:len(self.domains[v]) for v in self.crossword.variables if v not in assignment}).items(), key=lambda x:x[1])[0][0]
+        #sorted_values = sorted(({v:len(self.domains[v]) for v in self.crossword.variables if v not in assignment}).items(), key=lambda x:x[1])
+        #return sorted_values[0][0]
+        values = [(v,len(self.domains[v])) for v in self.crossword.variables if v not in assignment]
+        minimum = min([c for (v,c) in values])
+        min_values = [v for v in values if v[1] == minimum]
+        
+        if len(min_values) == 1: 
+            return min_values[0][0]
+        
+        degrees = [(v[0],len(self.crossword.neighbors(v[0]))) for v in min_values if v not in assignment]
+        maximum = max([c for (v,c) in degrees])
+        max_degrees = [v for v in degrees if v[1] == maximum]
+        
+        return max_degrees[0][0]
+        
         #raise NotImplementedError
 
     def backtrack(self, assignment):
@@ -223,8 +247,8 @@ def main():
     words = sys.argv[2]
     output = sys.argv[3] if len(sys.argv) == 4 else None
     """
-    structure = "data/structure0.txt"
-    words = "data/words0.txt"
+    structure = "data/structure1.txt"
+    words = "data/words1.txt"
     output = None
 
     # Generate crossword
