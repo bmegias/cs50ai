@@ -1,5 +1,6 @@
 import csv
 import sys
+import calendar
 
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -8,13 +9,15 @@ TEST_SIZE = 0.4
 
 
 def main():
-
+    """
     # Check command-line arguments
     if len(sys.argv) != 2:
         sys.exit("Usage: python shopping.py data")
 
     # Load data from spreadsheet and split into train and test sets
     evidence, labels = load_data(sys.argv[1])
+    """
+    evidence, labels = load_data("shopping.csv")
     X_train, X_test, y_train, y_test = train_test_split(
         evidence, labels, test_size=TEST_SIZE
     )
@@ -59,8 +62,26 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    months = {month: index-1 for index, month in enumerate(calendar.month_name) if month} | {month: index-1 for index, month in enumerate(calendar.month_abbr) if month}
+    boolto01 = lambda x: 1 if x=="TRUE" else 0
+    retvto01 = lambda x: 1 if x=="Returning_Visitor" else 0
+    tom = lambda x: months[x]
+    tof = lambda x: float(x)
+    toi = lambda x: int(x)
+    cast = [toi,tof,toi,tof,toi,tof,tof,tof,tof,tof,tom,toi,toi,toi,toi,retvto01,boolto01]
+    
+    evidence = []
+    labels = []
+    with open(filename) as f:
+        reader = csv.reader(f)
+        next(reader)
 
+        for row in reader:
+            evidence.append([cast[i](cell) for i, cell in enumerate(row[:17])])
+            labels.append(boolto01(row[17]))
+    data = (evidence, labels)
+    return data
+    #raise NotImplementedError
 
 def train_model(evidence, labels):
     """
