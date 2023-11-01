@@ -110,12 +110,12 @@ def evaluate(labels, predictions):
     actual negative labels that were accurately identified.
     """
     positive_labels = len([i for i in labels if i == 1])
-    positive_predictions = len([i for i in predictions if i == 1])
-    sensitivity = positive_predictions / positive_labels
+    positive_correct_predictions = len([i for i,p in enumerate(predictions) if p == 1 and labels[i] == p])
+    sensitivity = positive_correct_predictions / positive_labels
     
     negative_labels = len([i for i in labels if i == 0])
-    negative_predictions = len([i for i in predictions if i == 0])
-    specificity = negative_predictions / negative_labels
+    negative_correct_predictions = len([i for i,p in enumerate(predictions) if p == 0 and labels[i] == p])
+    specificity = negative_correct_predictions / negative_labels
     
     return (sensitivity,specificity)
     #raise NotImplementedError
