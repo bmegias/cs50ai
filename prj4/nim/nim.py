@@ -102,7 +102,7 @@ class NimAI():
         If no Q-value exists yet in `self.q`, return 0.
         """
         key = (tuple(state),action)
-        return self.q[key] if key in self.q.keys else 0
+        return self.q[key] if key in self.q.keys() else 0
         #raise NotImplementedError
 
     def update_q_value(self, state, action, old_q, reward, future_rewards):
@@ -153,7 +153,18 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
+        available_actions = list(Nim.available_actions(state))
+        best_action = available_actions[0]
+        best = self.get_q_value(state,best_action)
+        for a in available_actions:
+            q = self.get_q_value(state,a) 
+            if q > best:
+                best = q
+                best_action = a
+                break
+        
+        return random.choices([random.choice(available_actions),best_action],weights=[self.epsilon,1-self.epsilon])[0] if epsilon else best_action
+        #raise NotImplementedError
 
 
 def train(n):
