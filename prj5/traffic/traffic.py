@@ -9,8 +9,7 @@ from sklearn.model_selection import train_test_split
 EPOCHS = 10
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
-#NUM_CATEGORIES = 43
-NUM_CATEGORIES = 3
+NUM_CATEGORIES = 43
 TEST_SIZE = 0.4
 
 
@@ -24,8 +23,7 @@ def main():
     images, labels = load_data(sys.argv[1])
     """
     
-    images, labels = load_data("gtsrb-small")
-    #images, labels = load_data("gtsrb")
+    images, labels = load_data("gtsrb")
     
     # Split data into training and testing sets
     labels = tf.keras.utils.to_categorical(labels)
@@ -65,18 +63,15 @@ def load_data(data_dir):
     """
     imgs = list()
     lbls = list()
-    with os.scandir(data_dir) as folders:
-        for f in folders:
-            if os.path.isfile(f): continue
-            with os.scandir(f) as images:
-                for i in images:
-                    img = cv2.imread(i.path)
-                    res = cv2.resize(img,(IMG_WIDTH,IMG_HEIGHT))
-                    imgs.append(res)
-                    lbls.append(int(f.name))
+    for f in range(NUM_CATEGORIES):
+        with os.scandir(os.path.join(data_dir,str(f))) as images:
+            for i in images:
+                img = cv2.imread(i.path)
+                res = cv2.resize(img,(IMG_WIDTH,IMG_HEIGHT))
+                imgs.append(res)
+                lbls.append(f)
     return (imgs, lbls)
     #raise NotImplementedError
-
 
 def get_model():
     """
@@ -84,21 +79,29 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
+    # Create a convolutional neural network
     model = tf.keras.models.Sequential([
-        # Convolutional layer. 32 filters using a 3x3 kernel.
+
+        # Convolutional layer. Learn 32 filters using a 3x3 kernel
         tf.keras.layers.Conv2D(
-            10, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
         ),
 
-        # Pooling layer
+        # Max-pooling layer, using 2x2 pool size
         tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
         # Flatten units
         tf.keras.layers.Flatten(),
-        # Output layer with all NUM_CATEGORIES
-        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax") # Softmax takes the output and turns it into a prob distribution
+
+        # Add a hidden layer with dropout
+        #tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dropout(0.1),
+
+        # Add an output layer with NUM_CATEGORIES
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
     ])
 
+    # Train neural network
     model.compile(
         optimizer="adam",
         loss="categorical_crossentropy",
