@@ -14,14 +14,17 @@ TEST_SIZE = 0.4
 
 
 def main():
-
+    """
     # Check command-line arguments
     if len(sys.argv) not in [2, 3]:
         sys.exit("Usage: python traffic.py data_directory [model.h5]")
 
     # Get image arrays and labels for all image files
     images, labels = load_data(sys.argv[1])
-
+    """
+    
+    images, labels = load_data("gtsrb-small")
+    
     # Split data into training and testing sets
     labels = tf.keras.utils.to_categorical(labels)
     x_train, x_test, y_train, y_test = train_test_split(
@@ -58,7 +61,19 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    imgs = list()
+    lbls = list()
+    with os.scandir(data_dir) as folders:
+        for f in folders:
+            if os.path.isfile(f): continue
+            with os.scandir(f) as images:
+                for i in images:
+                    img = cv2.imread(i.path)
+                    res = cv2.resize(img,(IMG_WIDTH,IMG_HEIGHT))
+                    imgs.append(res)
+                    lbls.append(int(f.name))
+    return (imgs, lbls)
+    #raise NotImplementedError
 
 
 def get_model():
