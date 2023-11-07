@@ -76,6 +76,8 @@ def load_data(filename):
         next(reader)
 
         for row in reader:
+            if row[15]=="Other": # drop 'Other' values in visitor type?
+                continue
             evidence.append([cast[i](cell) for i, cell in enumerate(row[:17])])
             labels.append(boolto01(row[17]))
     data = (evidence, labels)
