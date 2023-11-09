@@ -12,7 +12,6 @@ IMG_HEIGHT = 30
 NUM_CATEGORIES = 43
 TEST_SIZE = 0.4
 
-
 def main():
     
     # Check command-line arguments
@@ -70,41 +69,41 @@ def load_data(data_dir):
     return (imgs, lbls)
     #raise NotImplementedError
 
-def get_model():
+def get_model(conv_num=2,conv_filter_size=256,conv_kernel_size=5,pool_size=2,hidden_num=1,hidden_dense=128,hidden_dropout=0.3):
     """
     Returns a compiled convolutional neural network model. Assume that the
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
     # Create a convolutional neural network
-    model = tf.keras.models.Sequential([
-
-        # Convolutional layer. Learn 32 filters using a 3x3 kernel
-        tf.keras.layers.Conv2D(
-            64, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
-        ),
+    model = tf.keras.models.Sequential()
+    
+    # Convolutional layers
+    for i in range(conv_num):
+        model.add(tf.keras.layers.Conv2D(
+                conv_filter_size, (conv_kernel_size,conv_kernel_size), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            ))
 
         # Max-pooling layer, using 2x2 pool size
-        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(pool_size,pool_size)))
 
-        # Flatten units
-        tf.keras.layers.Flatten(),
+    # Flatten units
+    model.add(tf.keras.layers.Flatten())
 
-        # Add a hidden layer with dropout
-        #tf.keras.layers.Dense(128, activation="relu"),
-        tf.keras.layers.Dropout(0.5),
+    # Add a hidden layers with dropout
+    for i in range(hidden_num):
+        model.add(tf.keras.layers.Dense(hidden_dense, activation="relu"))
+        model.add(tf.keras.layers.Dropout(hidden_dropout))
 
-        # Add an output layer with NUM_CATEGORIES
-        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
-    ])
+    # Add an output layer with NUM_CATEGORIES
+    model.add(tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax"))
 
-    # Train neural network
     model.compile(
         optimizer="adam",
         loss="categorical_crossentropy",
         metrics=["accuracy"]
     )
-
+    
     return model
     #raise NotImplementedError
 
