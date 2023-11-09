@@ -28,7 +28,7 @@ parser = nltk.ChartParser(grammar)
 
 
 def main():
-
+    
     # If filename specified, read sentence from file
     if len(sys.argv) == 2:
         with open(sys.argv[1]) as f:
@@ -37,7 +37,7 @@ def main():
     # Otherwise, get sentence as input
     else:
         s = input("Sentence: ")
-
+    
     # Convert input into list of words
     s = preprocess(s)
 
@@ -79,7 +79,7 @@ def np_chunk(tree):
     whose label is "NP" that does not itself contain any other
     noun phrases as subtrees.
     """
-    return []
+    return [s for s in tree.subtrees(lambda t: t.label() == "NP")]
     #raise NotImplementedError
 
 
