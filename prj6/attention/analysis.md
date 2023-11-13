@@ -2,7 +2,7 @@
 
 ## Layer 4, Head 10
 
-With the xample sentences I have appreciated a strong relationship among (under,my,feet), 
+I have appreciated a strong relationship among (under,my,feet), 
 and also in the construct ([verb],the,[MASK],grass).
 
 It is also worth noting that the top suggestions for verb 'feel' were 'soft','wet','dry' and
@@ -12,11 +12,13 @@ Example Sentences:
 - I see the [MASK] grass under my feet.
 - I feel the [MASK] grass under my feet.
 
-## Layer TODO, Head TODO
+## Layer 8, Head 11
 
-TODO
+There is a noticeable relationship between the demonstrative and the noun inside the object of the sentence (this/weather, damn/summer), with or without an adjective in between. 
+
+It's also worth noting the relation (I/[MASK]/this) in the first sentence and ([MASK]/enjoyed) in the second one.
 
 Example Sentences:
-- TODO
-- TODO
+- I [MASK] this damn weather.
+- We [MASK] enjoyed that summer.
 
