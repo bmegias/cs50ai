@@ -46,9 +46,11 @@ def get_mask_token_index(mask_token_id, inputs):
     `None` if not present in the `inputs`.
     """
     # TODO: Implement this function
-    raise NotImplementedError
-
-
+    for i,id in enumerate(inputs["input_ids"][0]):
+        if id.numpy() == mask_token_id:
+            return i
+    return None
+    #raise NotImplementedError
 
 def get_color_for_attention_score(attention_score):
     """
@@ -56,9 +58,9 @@ def get_color_for_attention_score(attention_score):
     given `attention_score`. Each value should be in the range [0, 255].
     """
     # TODO: Implement this function
-    raise NotImplementedError
-
-
+    g = int(round(attention_score.numpy() * 255,0))
+    return (g,g,g)
+    #raise NotImplementedError
 
 def visualize_attentions(tokens, attentions):
     """
@@ -71,12 +73,14 @@ def visualize_attentions(tokens, attentions):
     (starting count from 1).
     """
     # TODO: Update this function to produce diagrams for all layers and heads.
-    generate_diagram(
-        1,
-        1,
-        tokens,
-        attentions[0][0][0]
-    )
+    for i, attention in enumerate(attentions):
+        for k, head in enumerate(attention[0]):
+            generate_diagram(
+                i+1,
+                k+1,
+                tokens,
+                attentions[i][0][k]
+            )
 
 
 def generate_diagram(layer_number, head_number, tokens, attention_weights):
