@@ -1,9 +1,9 @@
 import unittest
-from shopping import load_data
+import shopping
 
 class TestShopping(unittest.TestCase):
     def test_load_data(self):
-        evidence, labels = load_data("shopping.csv")
+        evidence, labels = shopping.load_data("shopping.csv")
         for ev, lab in zip(evidence, labels):
             types = [type(data) for data in ev]
             self.assertEqual(types, [int, float, int, float, int, float,

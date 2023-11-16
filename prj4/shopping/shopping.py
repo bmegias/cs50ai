@@ -4,6 +4,7 @@ import calendar
 
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from pandas import read_csv
 
 TEST_SIZE = 0.4
 
@@ -31,7 +32,6 @@ def main():
     print(f"Incorrect: {(y_test != predictions).sum()}")
     print(f"True Positive Rate: {100 * sensitivity:.2f}%")
     print(f"True Negative Rate: {100 * specificity:.2f}%")
-
 
 def load_data(filename):
     """
@@ -61,27 +61,35 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    months = {month: index-1 for index, month in enumerate(calendar.month_name) if month} | {month: index-1 for index, month in enumerate(calendar.month_abbr) if month}
-    boolto01 = lambda x: 1 if x=="TRUE" else 0
-    retvto01 = lambda x: 1 if x=="Returning_Visitor" else 0
-    tom = lambda x: months[x]
-    tof = lambda x: float(x)
-    toi = lambda x: int(x)
-    cast = [toi,tof,toi,tof,toi,tof,tof,tof,tof,tof,tom,toi,toi,toi,toi,retvto01,boolto01]
+    data = read_csv(filename)
     
+    months = {month: index-1 for index, month in enumerate(calendar.month_name) if month} | {month: index-1 for index, month in enumerate(calendar.month_abbr) if month}
+
     evidence = []
     labels = []
-    with open(filename) as f:
-        reader = csv.reader(f)
-        next(reader)
-
-        for row in reader:
-            if row[15]=="Other": # drop 'Other' values in visitor type?
-                continue
-            evidence.append([cast[i](cell) for i, cell in enumerate(row[:17])])
-            labels.append(boolto01(row[17]))
-    data = (evidence, labels)
-    return data
+    for row in data.itertuples():
+        evidence.append([
+            int(row.Administrative),
+            float(row.Administrative_Duration),
+            int(row.Informational),
+            float(row.Informational_Duration),
+            int(row.ProductRelated),
+            float(row.ProductRelated_Duration),
+            float(row.BounceRates),
+            float(row.ExitRates),
+            float(row.PageValues),
+            float(row.SpecialDay),
+            months[row.Month],
+            int(row.OperatingSystems),
+            int(row.Browser),
+            int(row.Region),
+            int(row.TrafficType),
+            1 if row.VisitorType=="Returning_Visitor" else 0,
+            1 if row.Weekend else 0
+        ])
+        labels.append(1 if row.Revenue else 0)
+    
+    return (evidence, labels)
     #raise NotImplementedError
 
 def train_model(evidence, labels):
