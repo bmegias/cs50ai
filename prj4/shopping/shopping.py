@@ -62,8 +62,21 @@ def load_data(filename):
     is 1 if Revenue is true, and 0 otherwise.
     """
     data = read_csv(filename)
-    
-    months = {month: index-1 for index, month in enumerate(calendar.month_name) if month} | {month: index-1 for index, month in enumerate(calendar.month_abbr) if month}
+
+    months = {
+        'Jan': 0,
+        'Feb': 1,
+        'Mar': 2,
+        'Apr': 3,
+        'May': 4,
+        'June': 5,
+        'Jul': 6,
+        'Aug': 7,
+        'Sep': 8,
+        'Oct': 9,
+        'Nov': 10,
+        'Dec': 11
+    }
 
     evidence = []
     labels = []
@@ -88,7 +101,9 @@ def load_data(filename):
             1 if row.Weekend else 0
         ])
         labels.append(1 if row.Revenue else 0)
-    
+    #print(len(evidence),len(labels))
+    #for i in range(12310,12315):
+        #print(i+2,evidence[i],labels[i])
     return (evidence, labels)
     #raise NotImplementedError
 
